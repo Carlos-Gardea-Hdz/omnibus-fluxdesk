@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+/* Flux UI v2 (Livewire) — pulls in its own utilities/variants. */
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+
+/*
+ * Dark mode — class strategy on <html> (project law). Register the variant
+ * explicitly for Tailwind v4 / Oxide. One strategy project-wide.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — 3-tier architecture (ui-ux-tailwind4 §2).
+ *   1. Primitive: raw OKLCH ramps (never referenced in components directly).
+ *   2. Semantic: meaning. Components consume ONLY these.
+ * Both themes swap semantic VALUES, so `bg-surface` works in both modes with
+ * zero `dark:` variants on markup.
+ */
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Primitive accent ramp (OKLCH — perceptually even lightness). */
+    --color-brand-500: oklch(0.62 0.19 256);
+    --color-brand-600: oklch(0.55 0.2 256);
+
+    /* Semantic tokens — light theme defaults. */
+    --color-surface: oklch(0.99 0 0);
+    --color-surface-raised: oklch(0.97 0.004 256);
+    --color-text: oklch(0.21 0.01 256);
+    --color-text-muted: oklch(0.5 0.02 256);
+    --color-border: oklch(0.9 0.01 256);
+    --color-accent: var(--color-brand-600);
+    --color-accent-contrast: oklch(0.99 0 0);
+    --color-danger: oklch(0.58 0.22 25);
+}
+
+/* Drive native UI (scrollbars, form controls) from the manual class toggle. */
+:root {
+    color-scheme: light;
+}
+
+.dark {
+    color-scheme: dark;
+
+    /* Semantic tokens — dark theme. Elevation via lighter surfaces, not shadow. */
+    --color-surface: oklch(0.18 0.01 256);
+    --color-surface-raised: oklch(0.23 0.012 256);
+    --color-text: oklch(0.96 0.003 256);
+    --color-text-muted: oklch(0.72 0.015 256);
+    --color-border: oklch(0.32 0.012 256);
+    --color-accent: var(--color-brand-500);
+    --color-accent-contrast: oklch(0.16 0.01 256);
+}
+
+/*
+ * Reduced motion — neutralize decorative motion only; keep essential,
+ * meaning-bearing transitions (ui-ux-tailwind4 §6).
+ */
+@media (prefers-reduced-motion: reduce) {
+    .motion-safe-only {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}

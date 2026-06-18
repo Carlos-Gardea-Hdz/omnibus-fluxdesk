@@ -1,0 +1,38 @@
+# Local development services for FluxDesk.
+# Run with: docker compose up -d  (or use Laravel Sail: ./vendor/bin/sail up -d)
+#
+# This file provisions ONLY the backing services (PostgreSQL 18 + Valkey 8).
+# The PHP app runs via `php artisan serve` / Sail / Octane during development.
+
+services:
+  pgsql:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-fluxdesk}
+      POSTGRES_USER: ${DB_USERNAME:-fluxdesk}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - '${FORWARD_DB_PORT:-5432}:5432'
+    volumes:
+      - fluxdesk-pgsql:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-q', '-d', '${DB_DATABASE:-fluxdesk}', '-U', '${DB_USERNAME:-fluxdesk}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8
+    ports:
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+    volumes:
+      - fluxdesk-valkey:/data
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  fluxdesk-pgsql:
+  fluxdesk-valkey:

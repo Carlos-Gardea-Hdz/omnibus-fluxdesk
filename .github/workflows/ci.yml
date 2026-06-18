@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+
+    services:
+      pgsql:
+        image: postgres:18
+        env:
+          POSTGRES_DB: fluxdesk_test
+          POSTGRES_USER: fluxdesk
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fluxdesk"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: fluxdesk_test
+      DB_USERNAME: fluxdesk
+      DB_PASSWORD: secret
+
+    steps:
+      # NOTE: pin third-party actions to a full commit SHA before going live
+      # (security-2026 §4). Tags below are placeholders for local scaffolding.
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, redis, mbstring, bcmath
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build assets
+        run: pnpm run build
+
+      - name: Prepare app
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # CI gate order (fail fast): format → static analysis → tests.
+      - name: Format check (Pint)
+        run: ./vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan / Larastan level 10)
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+      - name: Tests (Pest, parallel)
+        run: ./vendor/bin/pest --parallel
+
+      - name: Dependency audit (Composer)
+        run: composer audit
+
+      - name: Dependency audit (pnpm)
+        run: pnpm audit --prod || true

@@ -1,0 +1,22 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 10
+
+    paths:
+        - app
+        - database
+        - routes
+
+    # Eloquent magic that Larastan models for us; keep noise out without
+    # loosening the level.
+    checkModelProperties: true
+
+    ignoreErrors:
+        # Laravel ships factory `definition()` typed as array<string, mixed>;
+        # Larastan at level 10 wants the model-property union. The framework's
+        # own stubs use this shape — accept it project-wide.
+        -
+            identifier: method.childReturnType
+            path: database/factories/*

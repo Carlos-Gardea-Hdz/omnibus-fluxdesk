@@ -1,0 +1,45 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# --- OMNIBUS hardening ---
+# Secrets / env (defence in depth — never commit any non-example env)
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+
+# Database dumps may carry real production PII (project law) — never commit
+/database/dumps
+/database/*.sql
+/database/*.dump
+*.sqlite
+*.sqlite-journal
+
+# Agent continuity notes (local only)
+/.agent-memory
+
+# Flux Pro license artifacts
+auth.json
