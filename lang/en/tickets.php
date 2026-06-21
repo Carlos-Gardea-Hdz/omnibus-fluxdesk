@@ -33,4 +33,10 @@ return [
     'comment_added' => 'Comment added.',
     'empty' => 'No tickets match the current filters.',
     'ticket_number' => 'Ticket #:id',
+    'category' => 'Category',
+    'all_categories' => 'All categories',
+    'no_category' => 'No category',
+    'sla' => 'SLA',
+    'due_at' => 'Due',
+    'overdue_only' => 'Overdue only',
 ];

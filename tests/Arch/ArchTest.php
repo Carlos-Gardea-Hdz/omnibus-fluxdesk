@@ -55,3 +55,21 @@ arch('domain does not depend on the HTTP layer')
 arch('domain does not depend on Livewire')
     ->expect('App\Domain')
     ->not->toUse('Livewire\Component');
+
+// --- Slice 002 (Categories + SLA) ---------------------------------------------
+// These belong to the existing Ticketing namespaces, so the broad rules above
+// already cover them; the explicit expectations below pin the slice-002 surface
+// so a misplaced class fails loudly rather than silently escaping the net.
+
+arch('the category model is final and an Eloquent model')
+    ->expect('App\Domain\Ticketing\Models\Category')
+    ->toBeFinal()
+    ->toExtend('Illuminate\Database\Eloquent\Model');
+
+arch('the category and sla enums are string-backed')
+    ->expect(['App\Domain\Ticketing\Enums\CategoryColor', 'App\Domain\Ticketing\Enums\SlaState'])
+    ->toBeStringBackedEnums();
+
+arch('livewire category component depends on the domain, never the reverse')
+    ->expect('App\Domain')
+    ->not->toUse('Livewire\Attributes\Url');

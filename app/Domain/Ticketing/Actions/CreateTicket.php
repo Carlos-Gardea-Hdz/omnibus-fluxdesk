@@ -10,6 +10,7 @@ use App\Domain\Ticketing\Events\TicketOpened;
 use App\Domain\Ticketing\Models\Ticket;
 use App\Domain\Ticketing\ValueObjects\TicketSubject;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -25,7 +26,10 @@ final readonly class CreateTicket
         // Re-validate the subject through the VO; if it builds, it is valid.
         $subject = new TicketSubject($data->subject);
 
-        return DB::transaction(function () use ($data, $requester, $subject): Ticket {
+        // Capture "now" once so created_at and the SLA due_at agree.
+        $now = CarbonImmutable::now();
+
+        return DB::transaction(function () use ($data, $requester, $subject, $now): Ticket {
             $ticket = Ticket::create([
                 'subject' => $subject->value,
                 'body' => $data->body,
@@ -33,6 +37,8 @@ final readonly class CreateTicket
                 'priority' => $data->priority,
                 'requester_id' => $requester->getKey(),
                 'assignee_id' => $data->assigneeId,
+                'category_id' => $data->categoryId,
+                'due_at' => $now->addHours($data->priority->slaHours()),
             ]);
 
             TicketOpened::dispatch($ticket->id);

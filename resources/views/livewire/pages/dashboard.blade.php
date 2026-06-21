@@ -62,9 +62,12 @@ class extends Component
         </div>
     </header>
 
-    <nav class="mb-6">
+    <nav class="mb-6 flex flex-wrap items-center gap-3">
         <flux:button href="{{ route('tickets.index') }}" variant="primary" icon="ticket" wire:navigate>
             {{ __('tickets.index_title') }}
+        </flux:button>
+        <flux:button href="{{ route('categories.index') }}" variant="ghost" icon="tag" wire:navigate>
+            {{ __('categories.manage') }}
         </flux:button>
     </nav>
 

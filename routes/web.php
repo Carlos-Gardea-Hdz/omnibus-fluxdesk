@@ -17,4 +17,7 @@ Route::middleware('auth')->group(function (): void {
     Route::livewire('/tickets', 'tickets::index')->name('tickets.index');
     Route::livewire('/tickets/create', 'tickets::create')->name('tickets.create');
     Route::livewire('/tickets/{ticket}', 'tickets::show')->name('tickets.show');
+
+    // Category management (taxonomy + colour). Full-page SFC, never a closure.
+    Route::livewire('/categories', 'categories::index')->name('categories.index');
 });

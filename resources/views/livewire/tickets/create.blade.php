@@ -3,6 +3,8 @@
 use App\Domain\Ticketing\Actions\CreateTicket;
 use App\Domain\Ticketing\Data\CreateTicketData;
 use App\Domain\Ticketing\Enums\TicketPriority;
+use App\Domain\Ticketing\Models\Category;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -19,6 +21,9 @@ class extends Component
 
     public string $priority = TicketPriority::Medium->value;
 
+    // Optional category — empty string in the select means "no category" (null).
+    public ?string $categoryId = null;
+
     /**
      * Build the DTO from component state — the DTO is the validation SSOT.
      * validateAndCreate throws ValidationException, which Livewire surfaces as
@@ -30,6 +35,7 @@ class extends Component
             'subject' => $this->subject,
             'body' => $this->body,
             'priority' => $this->priority,
+            'categoryId' => $this->categoryId !== '' ? $this->categoryId : null,
         ]);
 
         // Requester resolved server-side from the authenticated agent — never input.
@@ -39,11 +45,15 @@ class extends Component
     }
 
     /**
-     * @return array{priorities: list<TicketPriority>}
+     * @return array{priorities: list<TicketPriority>, categories: Collection<int, Category>}
      */
     public function with(): array
     {
-        return ['priorities' => TicketPriority::cases()];
+        return [
+            'priorities' => TicketPriority::cases(),
+            // Only active categories are selectable — archived ones are hidden.
+            'categories' => Category::query()->active()->orderBy('name')->get(['id', 'name']),
+        ];
     }
 }; ?>
 
@@ -75,6 +85,14 @@ class extends Component
                 <flux:select.option value="{{ $case->value }}">
                     {{ $case->label()[$lang] ?? $case->label()['en'] }}
                 </flux:select.option>
+            @endforeach
+        </flux:select>
+
+        <flux:select wire:model="categoryId" :label="__('tickets.category')">
+            <flux:select.option value="">{{ __('tickets.no_category') }}</flux:select.option>
+            @foreach ($categories as $category)
+                {{-- Category name is user input — {{ }} auto-escaped. --}}
+                <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
             @endforeach
         </flux:select>
 

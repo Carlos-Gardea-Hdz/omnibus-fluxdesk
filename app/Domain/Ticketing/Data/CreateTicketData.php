@@ -6,9 +6,12 @@ namespace App\Domain\Ticketing\Data;
 
 use App\Domain\Ticketing\Enums\TicketPriority;
 use App\Domain\Ticketing\ValueObjects\TicketSubject;
+use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Min;
+use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\Validation\Uuid;
 use Spatie\LaravelData\Data;
 
 /**
@@ -25,5 +28,7 @@ final class CreateTicketData extends Data
         public string $body,
         public TicketPriority $priority = TicketPriority::Medium,
         public ?string $assigneeId = null,
+        #[Nullable, Uuid, Exists('categories', 'id')]
+        public ?string $categoryId = null,
     ) {}
 }

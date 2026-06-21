@@ -7,6 +7,7 @@ use App\Domain\Ticketing\Data\AssignTicketData;
 use App\Domain\Ticketing\Data\CommentOnTicketData;
 use App\Domain\Ticketing\Enums\TicketStatus;
 use App\Domain\Ticketing\Exceptions\InvalidTicketTransition;
+use App\Domain\Ticketing\Models\Category;
 use App\Domain\Ticketing\Models\Ticket;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -27,12 +28,15 @@ class extends Component
 
     public ?string $assigneeId = null;
 
+    public ?string $categoryId = null;
+
     public string $commentBody = '';
 
     public function mount(Ticket $ticket): void
     {
         $this->ticketId = $ticket->id;
         $this->assigneeId = $ticket->assignee_id;
+        $this->categoryId = $ticket->category_id;
     }
 
     /**
@@ -67,6 +71,28 @@ class extends Component
     }
 
     /**
+     * Re-categorises the ticket (or clears it when blank). Does NOT recompute
+     * due_at — the SLA clock is fixed at creation by priority. Named descriptively
+     * (never transition(), which collides with Livewire\Component).
+     */
+    public function changeCategory(): void
+    {
+        $categoryId = $this->categoryId !== '' ? $this->categoryId : null;
+
+        // Guard against archived / unknown ids — only an active category may be set.
+        if ($categoryId !== null && ! Category::query()->active()->whereKey($categoryId)->exists()) {
+            $this->addError('category', __('tickets.no_category'));
+
+            return;
+        }
+
+        $this->ticket->update(['category_id' => $categoryId]);
+
+        // Refresh the memoised instance so with() reflects the new category.
+        unset($this->ticket);
+    }
+
+    /**
      * Posts a comment. Body validated via its DTO (SSOT); author resolved from
      * the authenticated agent server-side — never client input.
      */
@@ -87,7 +113,7 @@ class extends Component
     public function ticket(): Ticket
     {
         return Ticket::query()
-            ->with(['requester:id,name', 'assignee:id,name'])
+            ->with(['requester:id,name', 'assignee:id,name', 'category:id,name,color'])
             ->findOrFail($this->ticketId);
     }
 
@@ -108,7 +134,8 @@ class extends Component
      * @return array{
      *     ticket: Ticket,
      *     comments: Collection<int, \App\Domain\Ticketing\Models\TicketComment>,
-     *     agents: Collection<int, User>
+     *     agents: Collection<int, User>,
+     *     categories: Collection<int, Category>
      * }
      */
     public function with(): array
@@ -117,6 +144,8 @@ class extends Component
             'ticket' => $this->ticket,
             'comments' => $this->comments(),
             'agents' => User::query()->orderBy('name')->get(['id', 'name']),
+            // Active categories only — archived ones are not selectable.
+            'categories' => Category::query()->active()->orderBy('name')->get(['id', 'name']),
         ];
     }
 }; ?>
@@ -145,7 +174,28 @@ class extends Component
             <flux:badge :color="$ticket->priority->color()" size="sm">
                 {{ $ticket->priority->label()[$lang] ?? $ticket->priority->label()['en'] }}
             </flux:badge>
+
+            @if ($ticket->category !== null)
+                {{-- Category name is user input — {{ }} auto-escaped. --}}
+                <flux:badge :color="$ticket->category->color->token()" size="sm">
+                    {{ $ticket->category->name }}
+                </flux:badge>
+            @endif
+
+            @php($sla = $ticket->slaState())
+            @if ($sla !== null)
+                {{-- SLA state: colour + text together (WCAG 1.4.1). --}}
+                <flux:badge :color="$sla->color()" size="sm">
+                    {{ $sla->label()[$lang] ?? $sla->label()['en'] }}
+                </flux:badge>
+            @endif
         </div>
+
+        @if ($ticket->due_at !== null)
+            <div class="mt-2 text-sm text-text-muted">
+                {{ __('tickets.due_at') }}: {{ $ticket->due_at->diffForHumans() }}
+            </div>
+        @endif
     </header>
 
     <section class="mb-8" aria-label="{{ __('tickets.description') }}">
@@ -185,6 +235,25 @@ class extends Component
                 @endforeach
             </flux:select>
             <flux:button type="submit" variant="primary" size="sm">{{ __('tickets.assign') }}</flux:button>
+        </form>
+    </section>
+
+    <section class="mb-8" aria-label="{{ __('tickets.category') }}">
+        <flux:heading size="lg" class="mb-3">{{ __('tickets.category') }}</flux:heading>
+
+        @error('category')
+            <flux:callout variant="danger" class="mb-3">{{ $message }}</flux:callout>
+        @enderror
+
+        <form wire:submit="changeCategory" class="flex flex-wrap items-end gap-3">
+            <flux:select wire:model="categoryId" :aria-label="__('tickets.category')" class="min-w-56">
+                <flux:select.option value="">{{ __('tickets.no_category') }}</flux:select.option>
+                @foreach ($categories as $category)
+                    {{-- Category name is user input — {{ }} auto-escaped. --}}
+                    <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:button type="submit" variant="primary" size="sm">{{ __('tickets.save') }}</flux:button>
         </form>
     </section>
 

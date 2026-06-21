@@ -77,4 +77,15 @@ enum TicketStatus: string
     {
         return $this === self::Closed;
     }
+
+    /**
+     * Whether reaching this status stops the SLA clock — i.e. the ticket is
+     * considered done for SLA purposes. Distinct from {@see self::isTerminal()}
+     * (Closed-only, which gates lifecycle behaviour): a Resolved ticket also
+     * stops the clock even though it can still be re-opened.
+     */
+    public function stopsSlaClock(): bool
+    {
+        return $this === self::Resolved || $this === self::Closed;
+    }
 }

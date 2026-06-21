@@ -33,4 +33,10 @@ return [
     'comment_added' => 'Comentario añadido.',
     'empty' => 'Ningún ticket coincide con los filtros actuales.',
     'ticket_number' => 'Ticket n.º :id',
+    'category' => 'Categoría',
+    'all_categories' => 'Todas las categorías',
+    'no_category' => 'Sin categoría',
+    'sla' => 'SLA',
+    'due_at' => 'Vence',
+    'overdue_only' => 'Solo vencidos',
 ];

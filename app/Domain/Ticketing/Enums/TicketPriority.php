@@ -54,4 +54,18 @@ enum TicketPriority: string
             self::Urgent => 3,
         };
     }
+
+    /**
+     * Wall-clock hours allotted to resolve a ticket of this priority — the only
+     * place the SLA targets live. {@see Ticket::$due_at} is `created_at + slaHours`.
+     */
+    public function slaHours(): int
+    {
+        return match ($this) {
+            self::Urgent => 4,
+            self::High => 24,
+            self::Medium => 72,
+            self::Low => 168,
+        };
+    }
 }
