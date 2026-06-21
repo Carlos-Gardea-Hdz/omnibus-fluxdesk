@@ -28,14 +28,13 @@
         <env name="CACHE_STORE" value="array"/>
         <!--
             Test against the real PostgreSQL driver (project law: never SQLite).
-            CI provides a postgres service; override these via the CI env.
+            DB_HOST/DB_PORT/credentials are inherited from .env so the same suite
+            runs both inside the `laravel.test` container (DB_HOST=pgsql:5432) and
+            on the host. CI provides a postgres service and overrides via its env.
+            Only the test DATABASE is pinned here so Pest never touches dev data.
         -->
         <env name="DB_CONNECTION" value="pgsql"/>
-        <env name="DB_HOST" value="127.0.0.1"/>
-        <env name="DB_PORT" value="5432"/>
         <env name="DB_DATABASE" value="fluxdesk_test"/>
-        <env name="DB_USERNAME" value="fluxdesk"/>
-        <env name="DB_PASSWORD" value="secret"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
