@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'index_title' => 'Tickets',
+    'index_subtitle' => 'Every support request, triaged in one place.',
+    'new' => 'New ticket',
+    'subject' => 'Subject',
+    'body' => 'Description',
+    'priority' => 'Priority',
+    'status' => 'Status',
+    'requester' => 'Requester',
+    'assignee' => 'Assignee',
+    'unassigned' => 'Unassigned',
+    'created' => 'Created',
+    'search' => 'Search tickets…',
+    'all_statuses' => 'All statuses',
+    'all_priorities' => 'All priorities',
+    'create_title' => 'Open a ticket',
+    'save' => 'Create ticket',
+    'cancel' => 'Cancel',
+    'detail_title' => 'Ticket',
+    'description' => 'Description',
+    'assign' => 'Assign',
+    'transition' => 'Move to',
+    'transition_illegal' => 'That status change is not allowed from the current state.',
+    'transitioned' => 'Ticket status updated.',
+    'assigned' => 'Assignee updated.',
+    'comments' => 'Comments',
+    'comment_placeholder' => 'Add a comment…',
+    'add_comment' => 'Post comment',
+    'comment_added' => 'Comment added.',
+    'empty' => 'No tickets match the current filters.',
+    'ticket_number' => 'Ticket #:id',
+];

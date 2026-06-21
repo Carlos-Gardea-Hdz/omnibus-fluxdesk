@@ -45,18 +45,28 @@ class extends Component
             <flux:subheading>{{ __('dashboard.subtitle') }}</flux:subheading>
         </div>
 
-        {{-- Light / dark / system control (Flux-managed appearance). --}}
-        <flux:radio.group
-            x-data
-            variant="segmented"
-            x-model="$flux.appearance"
-            aria-label="{{ __('a11y.appearance') }}"
-        >
-            <flux:radio value="light" icon="sun" aria-label="{{ __('appearance.light') }}" />
-            <flux:radio value="dark" icon="moon" aria-label="{{ __('appearance.dark') }}" />
-            <flux:radio value="system" icon="computer-desktop" aria-label="{{ __('appearance.system') }}" />
-        </flux:radio.group>
+        <div class="flex items-center gap-4">
+            {{-- Light / dark / system control (Flux-managed appearance). --}}
+            <flux:radio.group
+                x-data
+                variant="segmented"
+                x-model="$flux.appearance"
+                aria-label="{{ __('a11y.appearance') }}"
+            >
+                <flux:radio value="light" icon="sun" aria-label="{{ __('appearance.light') }}" />
+                <flux:radio value="dark" icon="moon" aria-label="{{ __('appearance.dark') }}" />
+                <flux:radio value="system" icon="computer-desktop" aria-label="{{ __('appearance.system') }}" />
+            </flux:radio.group>
+
+            <livewire:auth::session-menu />
+        </div>
     </header>
+
+    <nav class="mb-6">
+        <flux:button href="{{ route('tickets.index') }}" variant="primary" icon="ticket" wire:navigate>
+            {{ __('tickets.index_title') }}
+        </flux:button>
+    </nav>
 
     <section
         aria-label="{{ __('dashboard.summary') }}"

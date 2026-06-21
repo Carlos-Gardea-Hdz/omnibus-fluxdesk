@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'index_title' => 'Tickets',
+    'index_subtitle' => 'Cada solicitud de soporte, clasificada en un solo lugar.',
+    'new' => 'Nuevo ticket',
+    'subject' => 'Asunto',
+    'body' => 'Descripción',
+    'priority' => 'Prioridad',
+    'status' => 'Estado',
+    'requester' => 'Solicitante',
+    'assignee' => 'Asignado a',
+    'unassigned' => 'Sin asignar',
+    'created' => 'Creado',
+    'search' => 'Buscar tickets…',
+    'all_statuses' => 'Todos los estados',
+    'all_priorities' => 'Todas las prioridades',
+    'create_title' => 'Abrir un ticket',
+    'save' => 'Crear ticket',
+    'cancel' => 'Cancelar',
+    'detail_title' => 'Ticket',
+    'description' => 'Descripción',
+    'assign' => 'Asignar',
+    'transition' => 'Mover a',
+    'transition_illegal' => 'Ese cambio de estado no está permitido desde el estado actual.',
+    'transitioned' => 'Estado del ticket actualizado.',
+    'assigned' => 'Asignación actualizada.',
+    'comments' => 'Comentarios',
+    'comment_placeholder' => 'Añade un comentario…',
+    'add_comment' => 'Publicar comentario',
+    'comment_added' => 'Comentario añadido.',
+    'empty' => 'Ningún ticket coincide con los filtros actuales.',
+    'ticket_number' => 'Ticket n.º :id',
+];

@@ -19,6 +19,7 @@ arch('weak hashes are banned')
 arch('domain models are final')
     ->expect('App\Domain\Ticketing\Models')
     ->toBeClasses()
+    ->toBeFinal()
     ->toExtend('Illuminate\Database\Eloquent\Model');
 
 arch('value objects are final and readonly')
@@ -35,6 +36,11 @@ arch('actions are final')
     ->expect('App\Domain\Ticketing\Actions')
     ->toBeFinal();
 
+arch('data transfer objects are final')
+    ->expect('App\Domain\Ticketing\Data')
+    ->toBeFinal()
+    ->toExtend('Spatie\LaravelData\Data');
+
 arch('enums are backed')
     ->expect('App\Domain\Ticketing\Enums')
     ->toBeEnums()
@@ -43,3 +49,9 @@ arch('enums are backed')
 arch('domain does not depend on the HTTP layer')
     ->expect('App\Domain')
     ->not->toUse('Illuminate\Http\Request');
+
+// The domain layer must not reach into the presentation layer either — Livewire
+// components depend on Actions, never the reverse (one-way dependency).
+arch('domain does not depend on Livewire')
+    ->expect('App\Domain')
+    ->not->toUse('Livewire\Component');

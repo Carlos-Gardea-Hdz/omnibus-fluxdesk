@@ -37,6 +37,7 @@ return [
         // the component tree mirrors the default `view_path` root below.
         'pages' => resource_path('views/livewire/pages'),
         'tickets' => resource_path('views/livewire/tickets'),
+        'auth' => resource_path('views/livewire/auth'),
     ],
 
     /*
