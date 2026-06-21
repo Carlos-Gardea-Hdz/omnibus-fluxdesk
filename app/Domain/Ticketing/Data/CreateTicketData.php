@@ -31,4 +31,25 @@ final class CreateTicketData extends Data
         #[Nullable, Uuid, Exists('categories', 'id')]
         public ?string $categoryId = null,
     ) {}
+
+    /**
+     * Normalise the subject BEFORE validation runs so the DTO and the
+     * {@see TicketSubject} VO measure the same string. The VO trims then guards
+     * length; if the DTO validated the untrimmed input, a whitespace-padded but
+     * short subject (e.g. "  x  ") would pass Min(3) here yet throw inside the VO
+     * — surfacing as an HTTP 500 instead of an inline field error. Trimming up
+     * front keeps the DTO the single source of truth: a trim-to-short subject
+     * becomes a `subject` validation error and never reaches the VO throw.
+     *
+     * @param  array<string, mixed>  $properties
+     * @return array<string, mixed>
+     */
+    public static function prepareForPipeline(array $properties): array
+    {
+        if (isset($properties['subject']) && is_string($properties['subject'])) {
+            $properties['subject'] = trim($properties['subject']);
+        }
+
+        return $properties;
+    }
 }

@@ -34,9 +34,13 @@ final readonly class UpdateCategory
 
     private function assertNameAvailable(string $name, Category $current): void
     {
+        // Both sides go through Postgres lower() so the app pre-check uses the
+        // exact same collation as the functional unique index on lower(name) —
+        // mb_strtolower can diverge for some non-ASCII, which would let a name
+        // slip past here only to trip a raw 23505 (uncaught → 500).
         $exists = Category::query()
             ->whereKeyNot($current->getKey())
-            ->whereRaw('lower(name) = ?', [mb_strtolower($name)])
+            ->whereRaw('lower(name) = lower(?)', [$name])
             ->exists();
 
         if ($exists) {

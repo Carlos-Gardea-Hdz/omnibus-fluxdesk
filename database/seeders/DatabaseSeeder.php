@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Domain\Ticketing\Enums\CategoryColor;
+use App\Domain\Ticketing\Enums\TicketStatus;
 use App\Domain\Ticketing\Models\Category;
 use App\Domain\Ticketing\Models\Ticket;
 use App\Models\User;
@@ -72,8 +73,13 @@ final class DatabaseSeeder extends Seeder
                     $attributes['due_at'] = CarbonImmutable::now()->subDays(2);
                     $attributes['resolved_at'] = null;
                 } elseif ($roll === 2) {
-                    // Resolved on time.
+                    // Resolved on time. A resolved_at must always pair with a
+                    // clock-stopping status (Resolved/Closed) — mirroring
+                    // TransitionTicket, which never sets one without the other.
                     $attributes['resolved_at'] = $due->subHours(1);
+                    $attributes['status'] = fake()->boolean()
+                        ? TicketStatus::Resolved
+                        : TicketStatus::Closed;
                 }
 
                 $ticket->update($attributes);

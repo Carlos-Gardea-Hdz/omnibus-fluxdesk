@@ -80,6 +80,24 @@ it('rejects a case-insensitive duplicate at the DB level via the functional inde
         ->toThrow(QueryException::class);
 });
 
+// AC-CAT-2d — collation alignment (W3): the app pre-check uses Postgres lower()
+// on BOTH sides (whereRaw 'lower(name) = lower(?)'), matching the functional unique
+// index. A non-ASCII casing-only duplicate is therefore rejected GRACEFULLY inline
+// (DuplicateCategoryName), never reaching a raw 23505/500.
+it('rejects a non-ASCII case-insensitive duplicate gracefully inline', function (): void {
+    $agent = User::factory()->create();
+    Category::factory()->create(['name' => 'Café']);
+
+    Livewire::actingAs($agent)
+        ->test('categories::index')
+        ->set('name', 'CAFÉ')
+        ->set('color', CategoryColor::cases()[0]->value)
+        ->call('save')
+        ->assertHasErrors('name');
+
+    expect(Category::query()->count())->toBe(1);
+});
+
 // AC-CAT-3 — editing changes the colour of an existing category in place.
 it('edits an existing category colour', function (): void {
     $agent = User::factory()->create();

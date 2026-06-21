@@ -77,7 +77,10 @@ class extends Component
             // Live-breach filter resolved in SQL — never row-by-row in PHP.
             ->when(
                 $this->overdueOnly,
-                fn ($query) => $query->where('due_at', '<', now())->whereNull('resolved_at')
+                // Boundary mirrors the model predicate (now >= due_at): at the
+                // instant now == due_at the SLA badge reads Overdue, so the
+                // filter must include the row too (<=, not <).
+                fn ($query) => $query->where('due_at', '<=', now())->whereNull('resolved_at')
             )
             ->latest()
             ->paginate(15);
